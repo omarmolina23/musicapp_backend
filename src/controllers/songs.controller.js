@@ -23,7 +23,6 @@ export const getSongById = async (req, res) => {
 }
 
 export const createSong = async(req, res) => {
-    console.log(req.body);
     const {title, artist, album, genre, duration, file_url, cover_url} = req.body;
     const [rows] = await pool.query("INSERT INTO songs (title, artist, album, genre, duration, file_url, cover_url) VALUES (?, ?, ?, ?, ?, ?, ?)", 
         [title, artist, album, genre, duration, file_url, cover_url])
