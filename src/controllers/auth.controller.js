@@ -26,9 +26,10 @@ export const signup = async (req, res) => {
         }
         else squery += ") VALUES (?, ?, ?)";
 
-        const query = await pool.query(squery, values);
+        const [query] = await pool.query(squery, values);
+        
         const token = jwt.sign({id: query.insertId}, SECRET, {
-            expiresIn: 1200
+            expiresIn: 86400
         })
     
         res.json({token});
@@ -52,7 +53,7 @@ export const signin = async (req, res) => {
         });
 
         const token = jwt.sign({id: rows[0].id}, SECRET, {
-            expiresIn: 1200
+            expiresIn: 86400
         })
     
         res.json({token});
