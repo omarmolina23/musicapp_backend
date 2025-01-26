@@ -11,7 +11,7 @@ export const signup = async (req, res) => {
         if(rows.length > 0) return res.status(400).json({message: "El usuario ya existe"});
     }
     catch(err) {
-        return res.status(500).json({message: "Error al buscar el usuario"});
+        return res.status(500).json({message: "Error al crear el usuario"});
     }
 
     const hashedPassword = await encryptPassword(password);
