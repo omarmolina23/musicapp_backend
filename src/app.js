@@ -19,6 +19,8 @@ app.use(fileUpload({
 app.use('/api',songsRoutes);
 app.use('/api',authRoutes);
 
+
+
 app.use((req, res, next) => {
     res.status(404).json(
         {

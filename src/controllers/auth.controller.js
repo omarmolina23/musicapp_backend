@@ -32,7 +32,7 @@ export const signup = async (req, res) => {
             expiresIn: 86400
         })
     
-        res.json({token});
+        res.json({name: name, email: email, token});
     }
     catch(err){
         return res.status(500).json({message: "Error al crear el usuario"});
@@ -56,7 +56,7 @@ export const signin = async (req, res) => {
             expiresIn: 86400
         })
     
-        res.json({token});
+        res.json({name: rows[0].name, email: rows[0].email, token});
     }
     catch(err){
         return res.status(500).json({message: "Error al buscar el usuario"});

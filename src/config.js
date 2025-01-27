@@ -10,6 +10,7 @@ export const SECRET = process.env.SECRET || "musicapp-api";
 
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "443406548073-mb6e76fdeq18d09e3r2pdq9ioq23euuo.apps.googleusercontent.com";
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "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";
+export const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL || "http://localhost:3000/api/google/callback";
 
 export const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 export const AWS_BUCKET_REGION = process.env.AWS_BUCKET_REGION;
