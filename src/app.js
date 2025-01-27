@@ -6,6 +6,7 @@ import googleRoutes from "./routes/google.routes.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
+const allowedOrigins = ['http://localhost:5173'];
 const app = express();
 
 app.use(cookieParser());
