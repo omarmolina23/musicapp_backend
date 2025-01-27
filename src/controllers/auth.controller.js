@@ -43,6 +43,8 @@ export const signup = async (req, res) => {
         // Generar token JWT
         const token = jwt.sign({ id: query.insertId }, SECRET, { expiresIn: 86400 });
 
+        res.cookie("auth-token", token, {httpOnly: true, maxAge: 86400});
+
         res.status(201).json({ name, email, token });
     } catch (err) {
         return res.status(500).json({ message: "Error al crear el usuario"});
@@ -67,6 +69,9 @@ export const signin = async (req, res) => {
         const token = jwt.sign({id: rows[0].id}, SECRET, {
             expiresIn: 86400
         })
+
+        res.cookie("auth-token", token, {httpOnly: true, maxAge: 86400});
+        
     
         res.json({name: rows[0].name, email: rows[0].email, token});
     }

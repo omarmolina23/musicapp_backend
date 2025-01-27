@@ -4,12 +4,17 @@ import songsRoutes from "./routes/songs.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import googleRoutes from "./routes/google.routes.js";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
+app.use(cookieParser());
+
 app.use(cors({
-    origin: "*"
+    origin: "*",
+    credentials: true
 }));
+
 app.use(express.json());
 app.use(fileUpload({
     useTempFiles: true,

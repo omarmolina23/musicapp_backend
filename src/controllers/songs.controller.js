@@ -1,4 +1,5 @@
 import { pool } from "../db.js";
+import fs from "fs";
 
 import { uploadFile, getFileUrl } from "../../s3.js";
 
@@ -39,20 +40,36 @@ export const getSongById = async (req, res) => {
 }
 
 export const createSong = async(req, res) => {
+
     if(!req.files) return res.status(400).json({message: "No se ha subido ningún archivo"});
 
-    if(!req.files.song) return res.status(400).json({message: "No se ha subido la canción"});
+    if (!req.files) {
+        return res.status(400).json({ message: "No se ha subido ningún archivo" });
+    }
 
-    if(!req.files.cover) return res.status(400).json({message: "No se ha subido la portada"});
-    
-    if(!req.files.song.mimetype.startsWith("audio")) return res.status(400).json({message: "El archivo no es una canción"});
+    if (!req.files.song) {
+        deleteTempFiles(req.files);
+        return res.status(400).json({ message: "No se ha subido la canción" });
+    }
 
-    if(!req.files.cover.mimetype.startsWith("image")) return res.status(400).json({message: "El archivo no es una imagen"});
+    if (!req.files.cover) {
+        deleteTempFiles(req.files);
+        return res.status(400).json({ message: "No se ha subido la portada" });
+    }
+
+    if (!req.files.song.mimetype.startsWith("audio")) {
+        deleteTempFiles(req.files);
+        return res.status(400).json({ message: "El archivo no es una canción" });
+    }
+
+    if (!req.files.cover.mimetype.startsWith("image")) {
+        deleteTempFiles(req.files);
+        return res.status(400).json({ message: "El archivo no es una imagen" });
+    }
 
     const songFile = req.files.song.name;
     const coverFile = req.files.cover.name;
 
-    console.log(req.files.song, " ", req.files.cover);
     const {title, artist, album, genre, duration} = req.body;
 
     try {
@@ -71,6 +88,8 @@ export const createSong = async(req, res) => {
 
         const [rows] = await pool.query("INSERT INTO songs (title, artist, album, genre, duration, file_url, cover_url) VALUES (?, ?, ?, ?, ?, ?, ?)", 
         [title, artist, album, genre, duration, songFileName, coverFileName]);
+
+        
 
         res.send(
             {
@@ -105,3 +124,12 @@ export const deleteSong = async(req, res) => {
 
     res.json({message: "Canción eliminada"});
 }
+
+const deleteTempFiles = (files) => {
+    try {
+        if (files.song?.tempFilePath) fs.unlinkSync(files.song.tempFilePath);
+        if (files.cover?.tempFilePath) fs.unlinkSync(files.cover.tempFilePath);
+    } catch (err) {
+        console.error("Error al eliminar los archivos temporales:", err);
+    }
+};
