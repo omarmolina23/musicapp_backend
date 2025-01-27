@@ -43,7 +43,7 @@ export const signup = async (req, res) => {
         // Generar token JWT
         const token = jwt.sign({ id: query.insertId }, SECRET, { expiresIn: 86400 });
 
-        res.cookie("auth-token", token, {httpOnly: true, maxAge: 86400});
+        res.cookie("auth-token", token, {httpOnly: true, maxAge: 86400, SameSite: "none"});
 
         res.status(201).json({ name, email, token });
     } catch (err) {
@@ -81,7 +81,7 @@ export const signin = async (req, res) => {
             expiresIn: 86400
         });
 
-        res.cookie("auth-token", token, { httpOnly: true, maxAge: 86400 });
+        res.cookie("auth-token", token, {httpOnly: true, maxAge: 86400, SameSite: "none"});
 
         res.json({ name: user.name, email: user.email, token });
 
