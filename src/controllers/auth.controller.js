@@ -51,32 +51,42 @@ export const signup = async (req, res) => {
     }
 };
 
-
-
 export const signin = async (req, res) => {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
-    try{
+    try {
         const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
-        if(rows.length <= 0) return res.status(400).json({message: "El usuario no existe"});
+        if (rows.length <= 0) {
+            return res.status(400).json({ message: "El usuario no existe" });
+        }
 
-        const isMatch = await comparePassword(password, rows[0].password);
-        if(!isMatch) return res.status(400).json({
-            token: null,
-            message: "Contraseña incorrecta"
+        const user = rows[0];
+
+        if (user.isPasswordSet) {
+            const isMatch = await comparePassword(password, user.password);
+            if (!isMatch) {
+                return res.status(400).json({
+                    token: null,
+                    message: "Contraseña incorrecta"
+                });
+            }
+        } else {
+            return res.status(400).json({
+                token: null,
+                message: "Este usuario fue registrado con Google. Usa el inicio de sesión con Google o configura una contraseña."
+            });
+        }
+
+        const token = jwt.sign({ id: user.id }, SECRET, {
+            expiresIn: 86400
         });
 
-        const token = jwt.sign({id: rows[0].id}, SECRET, {
-            expiresIn: 86400
-        })
+        res.cookie("auth-token", token, { httpOnly: true, maxAge: 86400 });
 
-        res.cookie("auth-token", token, {httpOnly: true, maxAge: 86400});
-        
-    
-        res.json({name: rows[0].name, email: rows[0].email, token});
-    }
-    catch(err){
-        return res.status(500).json({message: "Error al buscar el usuario"});
+        res.json({ name: user.name, email: user.email, token });
+
+    } catch (err) {
+        return res.status(500).json({ message: "Error al buscar el usuario" });
     }
 };
 
