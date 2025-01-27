@@ -4,40 +4,52 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
 export const signup = async (req, res) => {
-    const {name, email, password, role} = req.body;
+    const { name, email, password, role, googleId } = req.body;
 
-    try{
+    try {
         const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
-        if(rows.length > 0) return res.status(400).json({message: "El usuario ya existe"});
+        if (rows.length > 0) {
+            return res.status(400).json({ message: "El usuario ya existe" });
+        }
+    } catch (err) {
+        return res.status(500).json({ message: "Error al verificar el usuario" });
     }
-    catch(err) {
-        return res.status(500).json({message: "Error al crear el usuario"});
+
+    let hashedPassword = null;
+    let isPasswordSet = false;
+
+    if (!googleId) {
+        if (!password) {
+            return res.status(400).json({ message: "Se requiere una contraseña para el registro normal" });
+        }
+        hashedPassword = await encryptPassword(password);
+        isPasswordSet = true; 
     }
 
-    const hashedPassword = await encryptPassword(password);
+    try {
+        const fields = ["name", "email", "password", "googleId", "isPasswordSet"];
+        const values = [name, email, hashedPassword, googleId, isPasswordSet];
 
-    try{
-        let squery = "INSERT INTO users (name, email, password";
-        let values = [name, email, hashedPassword];
-
-        if(role) {
-            squery += ", role) VALUES (?, ?, ?, ?)";
+        if (role) {
+            fields.push("role");
             values.push(role);
         }
-        else squery += ") VALUES (?, ?, ?)";
+
+        const placeholders = fields.map(() => "?").join(", ");
+        const squery = `INSERT INTO users (${fields.join(", ")}) VALUES (${placeholders})`;
 
         const [query] = await pool.query(squery, values);
-        
-        const token = jwt.sign({id: query.insertId}, SECRET, {
-            expiresIn: 86400
-        })
-    
-        res.json({name: name, email: email, token});
-    }
-    catch(err){
-        return res.status(500).json({message: "Error al crear el usuario"});
+
+        // Generar token JWT
+        const token = jwt.sign({ id: query.insertId }, SECRET, { expiresIn: 86400 });
+
+        res.status(201).json({ name, email, token });
+    } catch (err) {
+        return res.status(500).json({ message: "Error al crear el usuario"});
     }
 };
+
+
 
 export const signin = async (req, res) => {
     const {email, password} = req.body;

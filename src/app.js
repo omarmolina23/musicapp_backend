@@ -2,6 +2,7 @@ import express from "express";
 import fileUpload from "express-fileupload";
 import songsRoutes from "./routes/songs.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import googleRoutes from "./routes/google.routes.js";
 import cors from "cors";
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(fileUpload({
 
 app.use('/api',songsRoutes);
 app.use('/api',authRoutes);
+app.use('/api',googleRoutes);
 
 
 
