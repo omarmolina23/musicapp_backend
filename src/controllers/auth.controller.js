@@ -1,5 +1,5 @@
-import {pool} from "../db.js";
-import {SECRET} from "../config.js";
+import { pool } from "../db.js";
+import { SECRET } from "../config.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
@@ -23,7 +23,7 @@ export const signup = async (req, res) => {
             return res.status(400).json({ message: "Se requiere una contraseña para el registro normal" });
         }
         hashedPassword = await encryptPassword(password);
-        isPasswordSet = true; 
+        isPasswordSet = true;
     }
 
     try {
@@ -43,16 +43,16 @@ export const signup = async (req, res) => {
         // Generar token JWT
         const token = jwt.sign({ id: query.insertId }, SECRET, { expiresIn: 86400 });
 
-        res.cookie("auth-token", token, {httpOnly: true, maxAge: 86400, SameSite: "none"});
+        res.cookie("auth-token", token, { httpOnly: true, maxAge: 86400, SameSite: "none" });
 
         res.status(201).json({ name, email, token });
     } catch (err) {
-        return res.status(500).json({ message: "Error al crear el usuario"});
+        return res.status(500).json({ message: "Error al crear el usuario" });
     }
 };
 
 export const signin = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, googleId } = req.body;
 
     try {
         const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [email]);
@@ -71,17 +71,28 @@ export const signin = async (req, res) => {
                 });
             }
         } else {
-            return res.status(400).json({
-                token: null,
-                message: "Este usuario fue registrado con Google. Usa el inicio de sesión con Google o configura una contraseña."
-            });
+            if (!googleId) {
+                return res.status(400).json({
+                    token: null,
+                    message: "Este usuario fue registrado con Google. Usa el inicio de sesión con Google o configura una contraseña."
+                });
+            }
+
+            const isMatchGoogleId = await compareGoogleId(googleId, user.googleId);
+            if (!isMatchGoogleId) {
+                return res.status(400).json({
+                    token: null,
+                    message: "Contraseña incorrecta"
+                });
+            }
+
         }
 
         const token = jwt.sign({ id: user.id }, SECRET, {
             expiresIn: 86400
         });
 
-        res.cookie("auth-token", token, {httpOnly: true, maxAge: 86400, SameSite: "none"});
+        res.cookie("auth-token", token, { httpOnly: true, maxAge: 86400, SameSite: "none" });
 
         res.json({ name: user.name, email: user.email, token });
 
@@ -97,4 +108,8 @@ const encryptPassword = async (password) => {
 
 const comparePassword = async (password, receivedPassword) => {
     return await bcrypt.compare(password, receivedPassword);
+}
+
+const compareGoogleId = async (googleId, receivedGoogleId) => {
+    return googleId === receivedGoogleId;
 }
