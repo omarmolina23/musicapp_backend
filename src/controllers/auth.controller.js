@@ -101,6 +101,11 @@ export const signin = async (req, res) => {
     }
 };
 
+export const signout = async (req, res) => {
+    res.clearCookie("auth-token", { httpOnly: true, SameSite: "none" });
+    res.status(200).json({ message: "Salida exitosa" });
+};
+
 const encryptPassword = async (password) => {
     const salt = await bcrypt.genSalt(10);
     return await bcrypt.hash(password, salt);
