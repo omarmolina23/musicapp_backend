@@ -43,7 +43,13 @@ export const signup = async (req, res) => {
         // Generar token JWT
         const token = jwt.sign({ id: query.insertId }, SECRET, { expiresIn: 86400 });
 
-        res.cookie("auth-token", token, { httpOnly: true, maxAge: 86400, SameSite: "none" });
+        res.cookie("auth-token", token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+            maxAge: 86400 * 1000, // 1 día en milisegundos
+          });
+          
 
         res.status(201).json({ name, email, token });
     } catch (err) {
@@ -92,7 +98,12 @@ export const signin = async (req, res) => {
             expiresIn: 86400
         });
 
-        res.cookie("auth-token", token, { httpOnly: true, maxAge: 86400, SameSite: "none" });
+        res.cookie("auth-token", token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+            maxAge: 86400 * 1000, // 1 día en milisegundos
+          });
 
         res.json({ name: user.name, email: user.email, token });
 
@@ -102,7 +113,12 @@ export const signin = async (req, res) => {
 };
 
 export const signout = async (req, res) => {
-    res.clearCookie("auth-token", { httpOnly: true, SameSite: "none" });
+    res.clearCookie("auth-token", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+      });
+      
     res.status(200).json({ message: "Salida exitosa" });
 };
 
