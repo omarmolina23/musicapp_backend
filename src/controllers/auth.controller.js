@@ -46,7 +46,7 @@ export const signup = async (req, res) => {
         res.cookie("auth-token", token, {
             httpOnly: true,
             secure: false,
-            sameSite: "lax",
+            sameSite: "None",
             maxAge: 86400 * 1000, // 1 día en milisegundos
           });
           
@@ -101,7 +101,7 @@ export const signin = async (req, res) => {
         res.cookie("auth-token", token, {
             httpOnly: true,
             secure: false,
-            sameSite: "lax",
+            sameSite: "None",
             maxAge: 86400 * 1000, // 1 día en milisegundos
           });
 
@@ -116,7 +116,7 @@ export const signout = async (req, res) => {
     res.clearCookie("auth-token", {
         httpOnly: true,
         secure: false,
-        sameSite: "lax",
+        sameSite: "None",
       });
       
     res.status(200).json({ message: "Salida exitosa" });
