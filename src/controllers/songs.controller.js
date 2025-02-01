@@ -4,8 +4,31 @@ import fs from "fs";
 import { uploadFile, getFileUrl } from "../../s3.js";
 
 export const getSongs = async (req, res) => {
-    const result = await pool.query("SELECT * FROM songs");
-    res.send(result[0]);
+    try {
+        const result = await pool.query("SELECT * FROM songs");
+
+        // Obtener la URL de la canción y del cover para cada canción
+        const songsWithUrls = await Promise.all(result[0].map(async (song) => {
+            const fileUrl = await getFileUrl(song.file_url);
+            const coverUrl = await getFileUrl(song.cover_url);
+
+            return {
+                id: song.id,
+                title: song.title,
+                artist: song.artist,
+                album: song.album,
+                genre: song.genre,
+                duration: song.duration,
+                file_url: fileUrl,
+                cover_url: coverUrl
+            };
+        }));
+
+        res.json(songsWithUrls);
+
+    } catch (err) {
+        return res.status(500).json({message: "Error al obtener las canciones"});
+    }
 }
 
 export const getSongById = async (req, res) => {
