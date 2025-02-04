@@ -6,7 +6,7 @@ import googleRoutes from "./routes/google.routes.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-const allowedOrigins = ['http://localhost:5173'];
+const allowedOrigins = ['http://localhost:5173', 'https://musicapp-owrmza8lk-omarmolinas-projects.vercel.app'];
 const app = express();
 
 app.use(cookieParser());
